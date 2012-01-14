@@ -42,6 +42,19 @@ namespace Rhino.Security.Services
             return DetachedCriteria.For<UsersGroup>()
                                     .Add(Subqueries.PropertyIn("Id", criteria));
 		}
+
+        public static DetachedCriteria AllGroups(UsersGroup group)
+        {
+            DetachedCriteria criteria = DetachedCriteria.For<UsersGroup>()
+                                                        .CreateAlias("AllChildren", "child", JoinType.LeftOuterJoin)
+                                                        .Add(
+                                                            Expression.Eq("child.id", group.Id) ||
+                                                            Expression.IdEq(group.Id))
+                                        .SetProjection(Projections.Id());
+
+            return DetachedCriteria.For<UsersGroup>()
+                                    .Add(Subqueries.PropertyIn("Id", criteria));
+        }
         
         public static DetachedCriteria AllGroups<TEntity>(TEntity entity)where TEntity:class
         {

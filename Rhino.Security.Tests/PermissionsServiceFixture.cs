@@ -54,6 +54,79 @@ namespace Rhino.Security.Tests
         }
 
         [Fact]
+        public void CanGetPermissionsByUsersGroup()
+        {
+            UsersGroup group = authorizationRepository.GetUsersGroupByName("Administrators");
+
+            permissionsBuilderService
+                .Allow("/Account/Edit")
+                .For(group)
+                .On(account)
+                .DefaultLevel()
+                .Save();
+            session.Flush();
+
+            Permission[] permissions = permissionService.GetPermissionsFor(group);
+            Assert.Equal(1, permissions.Length);
+        }
+
+        [Fact]
+        public void CanGetPermissionsByUsersGroup_ThatIncludeParentPermissions()
+        {
+            UsersGroup group = authorizationRepository.CreateChildUserGroupOf("Administrators", "DBA");
+
+            authorizationRepository.CreateOperation("/Account/Delete");
+
+            permissionsBuilderService
+                .Allow("/Account/Edit")
+                .For("Administrators")
+                .On(account)
+                .DefaultLevel()
+                .Save();
+            session.Flush();
+
+            permissionsBuilderService
+                .Allow("/Account/Delete")
+                .For("DBA")
+                .On(account)
+                .DefaultLevel()
+                .Save();
+            session.Flush();
+
+            Permission[] permissions = permissionService.GetPermissionsFor(group);
+            Assert.Equal(2, permissions.Length);
+        }
+
+        [Fact]
+        public void CanGetPermissionsByUsersGroup_ThatDoNotIncludeChildPermissions()
+        {
+            UsersGroup group = authorizationRepository.GetUsersGroupByName("Administrators");
+            
+            authorizationRepository.CreateChildUserGroupOf("Administrators", "DBA");
+
+            authorizationRepository.CreateOperation("/Account/Delete");
+
+            permissionsBuilderService
+                .Allow("/Account/Edit")
+                .For("Administrators")
+                .On(account)
+                .DefaultLevel()
+                .Save();
+            session.Flush();
+
+            permissionsBuilderService
+                .Allow("/Account/Delete")
+                .For("DBA")
+                .On(account)
+                .DefaultLevel()
+                .Save();
+            session.Flush();
+
+            Permission[] permissions = permissionService.GetPermissionsFor(group);
+            Assert.Equal(1, permissions.Length);
+        }
+
+        [Fact]
         public void CanGetPermissionsByEntity()
         {
             permissionsBuilderService

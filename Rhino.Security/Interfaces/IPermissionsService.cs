@@ -56,5 +56,12 @@ namespace Rhino.Security.Interfaces
 		/// <param name="entity">The entity.</param>
 		/// <returns></returns>
 		Permission[] GetPermissionsFor<TEntity>(TEntity entity) where TEntity : class;
+
+        /// <summary>
+        /// Gets all permissions for the specified group
+        /// </summary>
+        /// <param name="group">The group</param>
+        /// <returns></returns>
+	    Permission[] GetPermissionsFor(UsersGroup group);
 	}
 }

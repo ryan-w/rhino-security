@@ -154,7 +154,21 @@ namespace Rhino.Security.Services
 			return FindResults(criteria);
 		}
 
-		#endregion
+        /// <summary>
+        /// Gets all permissions for the specified group
+        /// </summary>
+        /// <param name="group">The group</param>
+        /// <returns></returns>
+        public Permission[] GetPermissionsFor(UsersGroup group)
+        {
+            DetachedCriteria criteria = DetachedCriteria.For<Permission>()
+                .Add(Subqueries.PropertyIn("UsersGroup.Id",
+                                              SecurityCriterions.AllGroups(group).SetProjection(Projections.Id())));
+
+            return FindResults(criteria);
+        }
+
+        #endregion
 
 		private Permission[] FindResults(DetachedCriteria criteria)
 		{
